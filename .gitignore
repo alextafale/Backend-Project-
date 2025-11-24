@@ -1,2 +1,7 @@
 node_modules/
 .env
+docker-compose.yml
+Dockerfile
+init-db.js
+package.json
+oackage-lock.json
