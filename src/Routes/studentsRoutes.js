@@ -31,6 +31,10 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/:id', getStudent, (req, res) => {
+  res.json(req.student);
+});
+
 router.post('/new', async (req, res) => {
   const { name, age, email, phone, address } = req.body;
   if (!name || !age || !email || !phone || !address) {
@@ -53,18 +57,61 @@ router.post('/new', async (req, res) => {
   }
 });
 
-router.get('/:id', getStudent, (req, res) => {
-  res.json(req.student);
+router.put('/update/:id', getStudent , async (req,res)=> {
+  console.log("Entró al PUT /update");
+  try{
+    const student = req.student;
+    student.name= req.body.name || student.name;
+    student.age= req.body.age || student.age;
+    student.email= req.body.email || student.email;
+    student.phone = req.body.phone || student.phone;
+    student.address = req.body.address || student.address;
+    const updatedStudent = await student.save();
+    res.json(updatedStudent);
+
+  } catch(error){
+    res.status(400).json({
+      message: error.message
+    })
+
+  }
 });
 
-router.delete('/:id', getStudent, async (req, res) => {
+router.patch('/upload/:id', getStudent, async (req, res) => {
+  if (!req.body.name && !req.body.age && !req.body.email && !req.body.phone && !req.body.address) {
+    return res.status(400).json({
+      message: 'At least one field must be provided for update'
+    });
+  }
+  
   try {
-    await req.student.remove();
+    const student = req.student;
+    student.name = req.body.name || student.name;
+    student.age = req.body.age || student.age;
+    student.email = req.body.email || student.email;
+    student.phone = req.body.phone || student.phone;
+    student.address = req.body.address || student.address;
+    
+    const updatedStudent = await student.save();
+    res.json(updatedStudent);
+  } catch (error) {
+    console.error('PATCH /students/upload/:id error:', error);
+    res.status(400).json({
+      message: error.message
+    });
+  }
+});
+
+router.delete('/drop/user/:id', getStudent, async (req, res) => {
+  try {
+    await req.student.deleteOne(); 
     res.json({ message: 'Student deleted' });
   } catch (error) {
     console.error('DELETE /students/:id error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+
 
 export default router;
